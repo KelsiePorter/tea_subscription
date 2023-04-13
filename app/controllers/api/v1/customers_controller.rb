@@ -1,6 +1,12 @@
 class Api::V1::CustomersController < ApplicationController
   before_action :find_customer
-  before_action :find_subscription
+  before_action :find_subscription, only: [:subscribe, :unsubscribe]
+
+  def index
+    all_subscriptions = @customer.subscriptions
+
+    render json: AllCustomerSubscriptionsSerializer.new(all_subscriptions), status: 200
+  end
 
   def subscribe 
     @customer.subscriptions << @subscription
