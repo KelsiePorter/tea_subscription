@@ -24,10 +24,13 @@ RSpec.describe CustomerSubscription do
       expect(customer.subscriptions).to eq([subscription1])
       expect(customer.subscriptions.size).to eq(1)
 
-      # customer.subscriptions << subscription1
+      customer_sub = customer.customer_subscriptions.new(
+        subscription_id: subscription1.id
+      )
 
-      # expect(customer.subscriptions).to eq([subscription1])
-      # expect(customer.subscriptions.size).to eq(1)
+      expect(customer_sub.valid?).to be false 
+      expect(customer_sub.errors.size).to eq(1)
+      expect(customer_sub.errors.full_messages.to_sentence).to eq('Customer is already subscribed to this tea subscription')
     end
   end
 end
