@@ -25,8 +25,8 @@ class Api::V1::CustomersController < ApplicationController
              .update(active: false)
 
    render json: { message: "Successfully unsubscribed from #{@subscription.title}" }, status: 200 
-  # Does not account for if a customer wants to re-subscribe. Would use a
-  # conditional to handle that if that feature was added in the future
+  # Does not account for if a customer wants to re-subscribe. Would use the JSON
+  # body to pass in the the attributes with the patch request
   end
 
   private
