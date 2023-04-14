@@ -35,5 +35,29 @@ RSpec.describe 'POST /customers/:customer_id/subscriptions/:subscription_id' do
       expect(customer_subscription_response[:data][:attributes][:subscription_id]).to eq(subscription1.id)
       expect(customer_subscription_response[:data][:attributes][:active]).to be true
     end
+
+    it 'sad path - customer cannot subscribe to a subscription more than once' do 
+      customer = Customer.create(first_name: "River", last_name: "Porter", email: "river@example.com", address: "123 Main St")
+      subscription1 = Subscription.create(title: "Summer Collection", price: 30.50, status: "available", frequency: 30)
+      tea1 = Tea.create(title: "Sleepy Time", description: "sleepy", temperature: 95, brew_time: 3)
+      tea2 = Tea.create(title: "Ginger", description: "ginger", temperature: 90, brew_time: 5)
+      subscription1.teas << tea1
+      subscription1.teas << tea2
+
+      post "/api/v1/customers/#{customer.id}/subscriptions/#{subscription1.id}"
+
+      expect(CustomerSubscription.count).to eq(1)
+
+      post "/api/v1/customers/#{customer.id}/subscriptions/#{subscription1.id}"
+
+      customer_subscription_response = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to be_successful
+      expect(response.status).to be(200)
+      expect(CustomerSubscription.count).to eq(1)
+      
+      expect(customer_subscription_response).to be_a Hash
+      expect(customer_subscription_response[:error]).to eq("Customer is already subscribed to this tea subscription")
+    end
   end
 end
