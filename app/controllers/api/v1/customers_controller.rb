@@ -9,12 +9,13 @@ class Api::V1::CustomersController < ApplicationController
   end
 
   def subscribe 
-    @customer.subscriptions << @subscription
-    customer_sub = @customer.customer_subscriptions.last
+    customer_sub = @customer.customer_subscriptions.new(subscription_id: @subscription.id)
 
-    render json: CustomerSubscriptionSerializer.new(customer_sub), status: 201
-    # TODO add a validation here that prevents a customer from duplicate subscribing
-    # right now, the .uniq in #index prevents a customer from seeing duplicates
+    if customer_sub.save 
+      render json: CustomerSubscriptionSerializer.new(customer_sub), status: 201
+    else
+      render json: {error: customer_sub.errors.full_messages.to_sentence}
+    end
   end
 
   def unsubscribe
@@ -24,7 +25,7 @@ class Api::V1::CustomersController < ApplicationController
              .update(active: false)
 
    render json: { message: "Successfully unsubscribed from #{@subscription.title}" }, status: 200 
-  #  Does not account for if a customer wants to re-subscribe. Would use a
+  # Does not account for if a customer wants to re-subscribe. Would use a
   # conditional to handle that if that feature was added in the future
   end
 
